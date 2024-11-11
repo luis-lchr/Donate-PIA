@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Crowdfunding {
+    address public owner;
+    uint public totalFunds;
+
+    // Evento que se emite cada vez que se reciben fondos
+    event FundsReceived(address indexed donor, uint amount);
+
+    // Modificador para permitir sólo al propietario ejecutar ciertas funciones
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Solo el propietario puede ejecutar esta funcion");
+        _;
+    }
+
+    // Constructor que inicializa el contrato con el propietario
+    constructor() {
+        owner = msg.sender;
+    }
+
+    mapping(address => uint) public contributions;
+
+    // Recibe fondos y los registra en el contrato
+    function donate() public payable {
+        require(msg.value > 0, "Debe enviar algo de ETH");
+        contributions[msg.sender] += msg.value;
+    }
+    // Función para enviar fondos al contrato
+    function sendFunds() public payable {
+        require(msg.value > 0, "Se debe enviar un monto mayor a cero");
+        totalFunds += msg.value;
+
+        // Emite el evento de fondos recibidos
+        emit FundsReceived(msg.sender, msg.value);
+    }
+
+    // Función para ver el balance total de fondos recaudados
+    function getBalance() public view returns (uint) {
+        return totalFunds;
+    }
+
+    // Función para que el propietario retire los fondos acumulados
+    function withdrawFunds() public onlyOwner {
+        require(totalFunds > 0, "No hay fondos para retirar");
+
+        // Transfiere el balance total al propietario y reinicia totalFunds
+        payable(owner).transfer(totalFunds);
+        totalFunds = 0;
+    }
+}
