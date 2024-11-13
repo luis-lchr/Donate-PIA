@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Web3 from 'web3';
-import getContract from './contract';
+import getContract from './contract.js';
 
 const App = () => {
     const [account, setAccount] = useState('');
     const [balance, setBalance] = useState('');
-    const [amount, setAmount] = useState(''); // Nueva variable para el monto a enviar
-    const [contractInstance, setContractInstance] = useState(null); // Guardar la instancia del contrato
+    const [isOwner, setIsOwner] = useState(false);
+    const [organizations, setOrganizations] = useState([]);
+    const [contractInstance, setContractInstance] = useState(null);
+    const [newOrg, setNewOrg] = useState(''); // Para el owner agregar una nueva organización
 
     const initWeb3 = async () => {
         if (window.ethereum) {
@@ -23,77 +25,125 @@ const App = () => {
     };
 
     const loadAccountData = async () => {
-      const web3 = await initWeb3();
-      if (!web3) {
-          console.log('Web3 no está inicializado.');
-          return;
-      }
-  
-      // Obtener la cuenta principal
-      const accounts = await web3.eth.getAccounts();
-      setAccount(accounts[0]);
-  
-      // Obtener el balance
-      const balanceInWei = await web3.eth.getBalance(accounts[0]);
-      const balanceInEther = web3.utils.fromWei(balanceInWei, 'ether');
-      setBalance(balanceInEther);
-  
-      // Obtener la instancia del contrato
-      const contract = await getContract();
-      setContractInstance(contract);
-  };  
+        const web3 = await initWeb3();
+        if (!web3) {
+            console.log('Web3 no está inicializado.');
+            return;
+        }
+
+        const accounts = await web3.eth.getAccounts();
+        setAccount(accounts[0]);
+
+        const balanceInWei = await web3.eth.getBalance(accounts[0]);
+        const balanceInEther = web3.utils.fromWei(balanceInWei, 'ether');
+        setBalance(balanceInEther);
+
+        const contract = await getContract();
+        setContractInstance(contract);
+
+        const ownerAddress = await contract.methods.owner().call();
+        setIsOwner(accounts[0].toLowerCase() === ownerAddress.toLowerCase());
+
+        const orgs = await contract.methods.getOrganizations().call();
+        console.log("Organizaciones obtenidas:", orgs); // Debugging
+        setOrganizations(orgs);
+    };
 
     useEffect(() => {
         loadAccountData();
     }, []);
 
-    // Función para manejar el envío de fondos
-    const handleSendFunds = async (e) => {
-        e.preventDefault();
-        if (!contractInstance || !amount) {
-            alert("Por favor, completa todos los campos y asegúrate de que el contrato esté cargado.");
+    const handleAddOrganization = async () => {
+        if (newOrg.trim() === '') return;
+        if (!contractInstance) {
+            console.error("El contrato no está inicializado.");
             return;
         }
 
         try {
-            const web3 = window.web3;
-            const amountInWei = web3.utils.toWei(amount, 'ether');
+            console.log("Agregando organización:", newOrg); // Debugging
+            await contractInstance.methods.addOrganization(newOrg).send({ from: account });
+            setNewOrg('');
+            loadAccountData();
+        } catch (error) {
+            console.error("Error al agregar organización:", error);
+        }
+    };
 
-            // Enviar la transacción al contrato
-            await contractInstance.methods.donate().send({
+    const handleWithdraw = async () => {
+        if (!contractInstance) return;
+
+        try {
+            console.log("Retirando fondos del contrato"); // Debugging
+            await contractInstance.methods.withdraw().send({ from: account });
+            loadAccountData();
+        } catch (error) {
+            console.error("Error al retirar fondos:", error);
+        }
+    };
+
+    const handleDonate = async (orgIndex, amount) => {
+        if (!amount || amount <= 0) return;
+
+        try {
+            const amountInWei = Web3.utils.toWei(amount.toString(), 'ether');
+            console.log(`Donando ${amount} ETH a la organización en el índice ${orgIndex}`); // Debugging
+            await contractInstance.methods.donate(orgIndex).send({
                 from: account,
                 value: amountInWei
             });
-
-            alert(`¡Fondos enviados exitosamente!`);
-            setAmount(''); // Resetear el campo de monto
-            loadAccountData(); // Recargar los datos para actualizar el balance
-
+            loadAccountData();
         } catch (error) {
-            console.error("Error al enviar fondos:", error);
-            alert("Error al enviar fondos. Verifica la consola para más detalles.");
+            console.error("Error al donar:", error);
         }
     };
 
     return (
         <div>
-            <h1>Crowdfunding con Smart Contracts</h1>
-            <p><strong>Cuenta conectada:</strong> {account}</p>
-            <p><strong>Balance:</strong> {balance} ETH</p>
+            <h1>Donate</h1>
+            <p>Tu cuenta: {account}</p>
+            <p>Balance: {balance} ETH</p>
 
-            <form onSubmit={handleSendFunds}>
-                <h2>Enviar Fondos</h2>
-                <label>
-                    Monto en ETH:
-                    <input 
-                        type="text" 
-                        value={amount} 
-                        onChange={(e) => setAmount(e.target.value)} 
-                        placeholder="0.1"
-                    />
-                </label>
-                <button type="submit">Enviar Fondos</button>
-            </form>
+            {isOwner ? (
+                <div>
+                    <h2>OWNER</h2>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        <button onClick={handleWithdraw}>
+                            Sacar fondos de contrato
+                        </button>
+                        <div>
+                            <input 
+                                type="text" 
+                                placeholder="Nombre de la organización"
+                                value={newOrg}
+                                onChange={(e) => setNewOrg(e.target.value)}
+                            />
+                            <button onClick={handleAddOrganization}>Agregar org</button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div>
+                    <h2>Organizaciones</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                        {organizations.map((org, index) => (
+                            <div key={index} style={{ border: '1px solid #ccc', padding: '10px' }}>
+                                <h3>{org.name}</h3>
+                                <input 
+                                    type="number" 
+                                    placeholder="Cantidad en ETH" 
+                                    onChange={(e) => setOrganizations(prevOrgs => 
+                                        prevOrgs.map((o, i) => i === index ? {...o, donationAmount: e.target.value} : o)
+                                    )}
+                                />
+                                <button onClick={() => handleDonate(index, org.donationAmount || 0)}>
+                                    Donar
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
