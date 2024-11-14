@@ -5,6 +5,16 @@ contract Crowdfunding {
     address public owner;
     uint public totalFunds;
 
+    struct Organization {
+        string name;
+        uint balance;
+    }
+    
+    Organization[] public organizations;
+
+    // Evento que se emite cada vez que se agrega una organización
+    event OrganizationAdded(string name);
+    
     // Evento que se emite cada vez que se reciben fondos
     event FundsReceived(address indexed donor, uint amount);
 
@@ -25,13 +35,14 @@ contract Crowdfunding {
     function donate() public payable {
         require(msg.value > 0, "Debe enviar algo de ETH");
         contributions[msg.sender] += msg.value;
+        totalFunds += msg.value;
+        emit FundsReceived(msg.sender, msg.value);
     }
+    
     // Función para enviar fondos al contrato
     function sendFunds() public payable {
         require(msg.value > 0, "Se debe enviar un monto mayor a cero");
         totalFunds += msg.value;
-
-        // Emite el evento de fondos recibidos
         emit FundsReceived(msg.sender, msg.value);
     }
 
@@ -43,9 +54,21 @@ contract Crowdfunding {
     // Función para que el propietario retire los fondos acumulados
     function withdrawFunds() public onlyOwner {
         require(totalFunds > 0, "No hay fondos para retirar");
-
-        // Transfiere el balance total al propietario y reinicia totalFunds
         payable(owner).transfer(totalFunds);
         totalFunds = 0;
+    }
+
+    // Nueva función para agregar una organización
+    function addOrganization(string memory _name) public onlyOwner {
+        organizations.push(Organization({
+            name: _name,
+            balance: 0
+        }));
+        emit OrganizationAdded(_name);
+    }
+
+    // Esta función devuelve la lista de organizaciones
+    function getOrganizations() public view returns (Organization[] memory) {
+        return organizations;
     }
 }

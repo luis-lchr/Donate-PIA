@@ -8,7 +8,7 @@ const App = () => {
     const [isOwner, setIsOwner] = useState(false);
     const [organizations, setOrganizations] = useState([]);
     const [contractInstance, setContractInstance] = useState(null);
-    const [newOrg, setNewOrg] = useState(''); // Para el owner agregar una nueva organización
+    const [newOrg, setNewOrg] = useState('');
 
     const initWeb3 = async () => {
         if (window.ethereum) {
@@ -45,7 +45,7 @@ const App = () => {
         setIsOwner(accounts[0].toLowerCase() === ownerAddress.toLowerCase());
 
         const orgs = await contract.methods.getOrganizations().call();
-        console.log("Organizaciones obtenidas:", orgs); // Debugging
+        console.log("Organizaciones obtenidas:", orgs);
         setOrganizations(orgs);
     };
 
@@ -61,7 +61,7 @@ const App = () => {
         }
 
         try {
-            console.log("Agregando organización:", newOrg); // Debugging
+            console.log("Agregando organización:", newOrg);
             await contractInstance.methods.addOrganization(newOrg).send({ from: account });
             setNewOrg('');
             loadAccountData();
@@ -74,11 +74,13 @@ const App = () => {
         if (!contractInstance) return;
 
         try {
-            console.log("Retirando fondos del contrato"); // Debugging
-            await contractInstance.methods.withdraw().send({ from: account });
+            console.log("Retirando fondos del contrato");
+            await contractInstance.methods.withdrawFunds().send({ from: account });
             loadAccountData();
+            alert("Fondos retirados exitosamente.");
         } catch (error) {
             console.error("Error al retirar fondos:", error);
+            alert("Error al retirar fondos. Asegúrate de estar usando la cuenta del propietario.");
         }
     };
 
@@ -87,8 +89,8 @@ const App = () => {
 
         try {
             const amountInWei = Web3.utils.toWei(amount.toString(), 'ether');
-            console.log(`Donando ${amount} ETH a la organización en el índice ${orgIndex}`); // Debugging
-            await contractInstance.methods.donate(orgIndex).send({
+            console.log(`Donando ${amount} ETH a la organización en el índice ${orgIndex}`);
+            await contractInstance.methods.donate().send({
                 from: account,
                 value: amountInWei
             });
