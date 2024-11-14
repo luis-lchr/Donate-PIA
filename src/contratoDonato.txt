@@ -8,13 +8,14 @@ contract Crowdfunding {
     struct Organization {
         string name;
         uint balance;
+        string description;  // Nueva descripción
+        uint fundGoal;       // Nueva meta de fondos
     }
     
     Organization[] public organizations;
 
     // Evento que se emite cada vez que se agrega una organización
-    event OrganizationAdded(string name);
-    
+    event OrganizationAdded(string name, string description, uint fundGoal);    
     // Evento que se emite cada vez que se reciben fondos
     event FundsReceived(address indexed donor, uint amount);
 
@@ -59,13 +60,17 @@ contract Crowdfunding {
     }
 
     // Nueva función para agregar una organización
-    function addOrganization(string memory _name) public onlyOwner {
+        function addOrganization(string memory _name, string memory _description, uint _fundGoal) public onlyOwner {
         organizations.push(Organization({
             name: _name,
+            description: _description,
+            fundGoal: _fundGoal,
             balance: 0
         }));
-        emit OrganizationAdded(_name);
-    }
+
+        emit OrganizationAdded(_name, _description, _fundGoal);
+     }
+
 
     // Esta función devuelve la lista de organizaciones
     function getOrganizations() public view returns (Organization[] memory) {

@@ -8,7 +8,7 @@ const App = () => {
     const [isOwner, setIsOwner] = useState(false);
     const [organizations, setOrganizations] = useState([]);
     const [contractInstance, setContractInstance] = useState(null);
-    const [newOrg, setNewOrg] = useState('');
+    const [newOrg, setNewOrg] = useState({ name: '', description: '', fundGoal: '' });
 
     const initWeb3 = async () => {
         if (window.ethereum) {
@@ -54,22 +54,23 @@ const App = () => {
     }, []);
 
     const handleAddOrganization = async () => {
-        if (newOrg.trim() === '') return;
+        if (newOrg.name.trim() === '' || newOrg.description.trim() === '' || !newOrg.fundGoal) return;
         if (!contractInstance) {
             console.error("El contrato no está inicializado.");
             return;
         }
-
+    
         try {
-            console.log("Agregando organización:", newOrg);
-            await contractInstance.methods.addOrganization(newOrg).send({ from: account });
-            setNewOrg('');
+            await contractInstance.methods
+                .addOrganization(newOrg.name, newOrg.description, Web3.utils.toWei(newOrg.fundGoal, 'ether'))
+                .send({ from: account });
+            setNewOrg({ name: '', description: '', fundGoal: '' });
             loadAccountData();
         } catch (error) {
             console.error("Error al agregar organización:", error);
         }
     };
-
+    
     const handleWithdraw = async () => {
         if (!contractInstance) return;
 
@@ -117,8 +118,20 @@ const App = () => {
                             <input 
                                 type="text" 
                                 placeholder="Nombre de la organización"
-                                value={newOrg}
-                                onChange={(e) => setNewOrg(e.target.value)}
+                                value={newOrg.name}
+                                onChange={(e) => setNewOrg({ ...newOrg, name: e.target.value })} 
+                            />
+                            <input
+                                type="text"
+                                placeholder="Descripcion de la organización"
+                                value={newOrg.description}
+                                onChange={(e) => setNewOrg({ ...newOrg, description: e.target.value })} 
+                            />
+                            <input 
+                                type="number" 
+                                placeholder="Meta de fondos en ETH" 
+                                value={newOrg.fundGoal} 
+                                onChange={(e) => setNewOrg({ ...newOrg, fundGoal: e.target.value })} 
                             />
                             <button onClick={handleAddOrganization}>Agregar org</button>
                         </div>
@@ -130,18 +143,21 @@ const App = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
                         {organizations.map((org, index) => (
                             <div key={index} style={{ border: '1px solid #ccc', padding: '10px' }}>
-                                <h3>{org.name}</h3>
-                                <input 
-                                    type="number" 
-                                    placeholder="Cantidad en ETH" 
-                                    onChange={(e) => setOrganizations(prevOrgs => 
-                                        prevOrgs.map((o, i) => i === index ? {...o, donationAmount: e.target.value} : o)
-                                    )}
-                                />
-                                <button onClick={() => handleDonate(index, org.donationAmount || 0)}>
-                                    Donar
-                                </button>
-                            </div>
+                            <h3>{org.name}</h3>
+                            <p>Descripción: {org.description}</p>
+                            <p>Meta de fondos: {Web3.utils.fromWei(org.fundGoal, 'ether')} ETH</p>
+                            <p>Balance: {Web3.utils.fromWei(org.balance, 'ether')} ETH</p>
+                            <input 
+                                type="number" 
+                                placeholder="Cantidad en ETH" 
+                                onChange={(e) => setOrganizations(prevOrgs => 
+                                    prevOrgs.map((o, i) => i === index ? {...o, donationAmount: e.target.value} : o)
+                                )}
+                            />
+                            <button onClick={() => handleDonate(index, org.donationAmount || 0)}>
+                                Donar
+                            </button>
+                        </div>
                         ))}
                     </div>
                 </div>
