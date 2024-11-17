@@ -2,78 +2,40 @@
 pragma solidity ^0.8.0;
 
 contract Crowdfunding {
-    address public owner;
-    uint public totalFunds;
-
     struct Organization {
         string name;
-        uint balance;
-        string description;  // Nueva descripción
-        uint fundGoal;       // Nueva meta de fondos
+        string description;
+        uint fundGoal; // Meta de fondos en wei
+        uint balance; // Balance actual en wei
     }
-    
+
+    address public owner;
     Organization[] public organizations;
 
-    // Evento que se emite cada vez que se agrega una organización
-    event OrganizationAdded(string name, string description, uint fundGoal);    
-    // Evento que se emite cada vez que se reciben fondos
-    event FundsReceived(address indexed donor, uint amount);
-    // Evento para rastrear donaciones a organizaciones específicas
-    event OrganizationFunded(uint orgIndex, address indexed donor, uint amount);
-
-    // Modificador para permitir sólo al propietario ejecutar ciertas funciones
     modifier onlyOwner() {
-        require(msg.sender == owner, "Solo el propietario puede ejecutar esta funcion");
+        require(msg.sender == owner, "Solo el owner puede realizar esta accion.");
         _;
     }
 
-    // Constructor que inicializa el contrato con el propietario
+    event OrganizationAdded(string name, string description, uint fundGoal);
+    event DonationReceived(uint index, address donor, uint amount);
+    event OrganizationEdited(uint index, string newName, string newDescription, uint newFundGoal);
+    event FundsWithdrawn(address to, uint amount);
+
     constructor() {
         owner = msg.sender;
     }
 
-    mapping(address => uint) public contributions;
+    // Agregar una nueva organización
+    function addOrganization(
+        string memory _name,
+        string memory _description,
+        uint _fundGoal
+    ) public onlyOwner {
+        require(bytes(_name).length > 0, "El nombre no puede estar vacio.");
+        require(bytes(_description).length > 0, "La descripcion no puede estar vacia.");
+        require(_fundGoal > 0, "La meta de fondos debe ser mayor a cero.");
 
-    // Nueva función para donar a una organización específica
-    function donate(uint orgIndex) public payable {
-        require(orgIndex < organizations.length, "Indice de organizacion invalido");
-        require(msg.value > 0, "Debe enviar algo de ETH");
-
-        // Incrementar el balance de la organización seleccionada
-        organizations[orgIndex].balance += msg.value;
-
-        // Registrar la contribución del donante
-        contributions[msg.sender] += msg.value;
-
-        // Incrementar el total de fondos del contrato
-        totalFunds += msg.value;
-
-        // Emitir eventos
-        emit FundsReceived(msg.sender, msg.value);
-        emit OrganizationFunded(orgIndex, msg.sender, msg.value);
-    }
-    
-    // Función para enviar fondos al contrato (sin organización específica)
-    function sendFunds() public payable {
-        require(msg.value > 0, "Se debe enviar un monto mayor a cero");
-        totalFunds += msg.value;
-        emit FundsReceived(msg.sender, msg.value);
-    }
-
-    // Función para ver el balance total de fondos recaudados
-    function getBalance() public view returns (uint) {
-        return totalFunds;
-    }
-
-    // Función para que el propietario retire los fondos acumulados
-    function withdrawFunds() public onlyOwner {
-        require(totalFunds > 0, "No hay fondos para retirar");
-        payable(owner).transfer(totalFunds);
-        totalFunds = 0;
-    }
-
-    // Nueva función para agregar una organización
-    function addOrganization(string memory _name, string memory _description, uint _fundGoal) public onlyOwner {
         organizations.push(Organization({
             name: _name,
             description: _description,
@@ -84,7 +46,53 @@ contract Crowdfunding {
         emit OrganizationAdded(_name, _description, _fundGoal);
     }
 
-    // Esta función devuelve la lista de organizaciones
+    // Donar a una organización
+    function donate(uint _index) public payable {
+        require(_index < organizations.length, "Organizacion no valida.");
+        Organization storage org = organizations[_index];
+
+        require(msg.value > 0, "La cantidad de la donacion debe ser mayor a cero.");
+        require(org.balance < org.fundGoal, "La meta de fondos ya ha sido alcanzada.");
+
+        org.balance += msg.value;
+
+        emit DonationReceived(_index, msg.sender, msg.value);
+    }
+
+    // Editar los datos de una organización
+    function editOrganization(
+        uint _index,
+        string memory _newName,
+        string memory _newDescription,
+        uint _newFundGoal
+    ) public onlyOwner {
+        require(_index < organizations.length, "Organizacion no valida.");
+        Organization storage org = organizations[_index];
+
+        require(org.balance < org.fundGoal, "No se puede editar una organizacion finalizada.");
+
+        require(bytes(_newName).length > 0, "El nombre no puede estar vacio.");
+        require(bytes(_newDescription).length > 0, "La descripcion no puede estar vacia.");
+        require(_newFundGoal > 0, "La meta de fondos debe ser mayor a cero.");
+
+        org.name = _newName;
+        org.description = _newDescription;
+        org.fundGoal = _newFundGoal;
+
+        emit OrganizationEdited(_index, _newName, _newDescription, _newFundGoal);
+    }
+
+    // Retirar fondos acumulados (solo el owner)
+    function withdrawFunds() public onlyOwner {
+        uint contractBalance = address(this).balance;
+        require(contractBalance > 0, "No hay fondos para retirar.");
+
+        payable(owner).transfer(contractBalance);
+
+        emit FundsWithdrawn(owner, contractBalance);
+    }
+
+    // Obtener el total de organizaciones
     function getOrganizations() public view returns (Organization[] memory) {
         return organizations;
     }
