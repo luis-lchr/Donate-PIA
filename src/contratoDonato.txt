@@ -18,6 +18,8 @@ contract Crowdfunding {
     event OrganizationAdded(string name, string description, uint fundGoal);    
     // Evento que se emite cada vez que se reciben fondos
     event FundsReceived(address indexed donor, uint amount);
+    // Evento para rastrear donaciones a organizaciones específicas
+    event OrganizationFunded(uint orgIndex, address indexed donor, uint amount);
 
     // Modificador para permitir sólo al propietario ejecutar ciertas funciones
     modifier onlyOwner() {
@@ -32,15 +34,26 @@ contract Crowdfunding {
 
     mapping(address => uint) public contributions;
 
-    // Recibe fondos y los registra en el contrato
-    function donate() public payable {
+    // Nueva función para donar a una organización específica
+    function donate(uint orgIndex) public payable {
+        require(orgIndex < organizations.length, "Indice de organizacion invalido");
         require(msg.value > 0, "Debe enviar algo de ETH");
+
+        // Incrementar el balance de la organización seleccionada
+        organizations[orgIndex].balance += msg.value;
+
+        // Registrar la contribución del donante
         contributions[msg.sender] += msg.value;
+
+        // Incrementar el total de fondos del contrato
         totalFunds += msg.value;
+
+        // Emitir eventos
         emit FundsReceived(msg.sender, msg.value);
+        emit OrganizationFunded(orgIndex, msg.sender, msg.value);
     }
     
-    // Función para enviar fondos al contrato
+    // Función para enviar fondos al contrato (sin organización específica)
     function sendFunds() public payable {
         require(msg.value > 0, "Se debe enviar un monto mayor a cero");
         totalFunds += msg.value;
@@ -60,7 +73,7 @@ contract Crowdfunding {
     }
 
     // Nueva función para agregar una organización
-        function addOrganization(string memory _name, string memory _description, uint _fundGoal) public onlyOwner {
+    function addOrganization(string memory _name, string memory _description, uint _fundGoal) public onlyOwner {
         organizations.push(Organization({
             name: _name,
             description: _description,
@@ -69,8 +82,7 @@ contract Crowdfunding {
         }));
 
         emit OrganizationAdded(_name, _description, _fundGoal);
-     }
-
+    }
 
     // Esta función devuelve la lista de organizaciones
     function getOrganizations() public view returns (Organization[] memory) {
