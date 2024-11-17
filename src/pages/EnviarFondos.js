@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Web3 from 'web3';
 import contractABI from './CrowdfundingABI.json';
 
-const contractAddress = "0xAA89eAD4f4C8BBcaf4232BAF5937f45c91D08c95"; // Reemplaza con la dirección de tu contrato
+const contractAddress = "0x8220b94E6deBeA1d0F8Ef256A06F1bD8C7A99e3A"; // Reemplaza con la dirección de tu contrato
 
 const EnviarFondos = () => {
     const [monto, setMonto] = useState("");

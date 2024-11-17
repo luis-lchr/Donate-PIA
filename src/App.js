@@ -104,6 +104,21 @@ const App = () => {
         }
     };
 
+    const handleDeleteOrganization = async (index) => {
+        if (!contractInstance) {
+            console.error('El contrato no está inicializado.');
+            return;
+        }
+
+        try {
+            await contractInstance.methods.deleteOrganization(index).send({ from: account });
+            loadAccountData();
+            alert('Organización eliminada exitosamente.');
+        } catch (error) {
+            console.error('Error al eliminar la organización:', error);
+        }
+    };
+
     const handleWithdraw = async () => {
         if (!contractInstance) return;
 
@@ -223,6 +238,11 @@ const App = () => {
                                         }
                                     >
                                         Editar
+                                    </button>
+                                )}
+                                {isOwner && (
+                                    <button onClick={() => handleDeleteOrganization(index)}>
+                                        Eliminar
                                     </button>
                                 )}
                                 {!org.goalReached && !isOwner && (

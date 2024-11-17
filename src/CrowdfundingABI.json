@@ -31,6 +31,19 @@
                     "type": "uint256"
                 }
             ],
+            "name": "deleteOrganization",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_index",
+                    "type": "uint256"
+                }
+            ],
             "name": "donate",
             "outputs": [],
             "stateMutability": "payable",
@@ -261,7 +274,7 @@
     ],
     "networks": {
 		"5777": {
-			"address": "0xAA89eAD4f4C8BBcaf4232BAF5937f45c91D08c95"
+			"address": "0x8220b94E6deBeA1d0F8Ef256A06F1bD8C7A99e3A"
 		}
 	}
 }

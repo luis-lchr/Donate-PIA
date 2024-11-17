@@ -96,4 +96,15 @@ contract Crowdfunding {
     function getOrganizations() public view returns (Organization[] memory) {
         return organizations;
     }
+
+    function deleteOrganization(uint _index) public onlyOwner {
+    require(_index < organizations.length, "Index fuera de rango");
+    
+    for (uint i = _index; i < organizations.length - 1; i++) {
+        organizations[i] = organizations[i + 1];
+    }
+    
+    organizations.pop(); // Elimina el último elemento
+    }
+
 }
