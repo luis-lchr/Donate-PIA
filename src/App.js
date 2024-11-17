@@ -225,7 +225,7 @@ const App = () => {
                                         Editar
                                     </button>
                                 )}
-                                {!org.goalReached && (
+                                {!org.goalReached && !isOwner && (
                                     <>
                                         <input
                                             type="number"
