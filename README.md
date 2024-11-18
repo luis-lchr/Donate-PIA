@@ -1,6 +1,21 @@
 # Donate [PIA Nuevas Tecnologías]
-Realizado por: Alondra Berenise Zamora Moreno
-               Luis Carlos Hernández Rivera
-               Saúl Dávila González
+# Realizado por: Alondra Berenise Zamora Moreno, Luis Carlos Hernández Rivera, Saúl Dávila González
 
 "Donate" es una aplicación descentralizada diseñada específicamente para organizaciones sin fines de lucro que desean contar con una herramienta moderna, segura y transparente para gestionar sus iniciativas de recaudación de fondos. Esta plataforma aprovecha la tecnología blockchain para ofrecer un entorno descentralizado que garantiza la integridad y eficiencia en el manejo de los recursos.
+![Donate_main](https://github.com/user-attachments/assets/7fafcb42-79c7-441f-aed8-a2817941c309)
+En "Donate", existen dos tipos de roles principales: el owner (propietario) y los usuarios normales. El owner es la persona encargada de gestionar la aplicación y tiene privilegios exclusivos, como crear, editar y eliminar causas sociales dentro de la plataforma. Además, puede retirar los fondos acumulados en el contrato inteligente una vez alcanzadas las metas establecidas para las causas. Por otro lado, los usuarios normales solo tienen acceso a las funcionalidades relacionadas con la donación. Pueden visualizar las causas activas, realizar aportaciones económicas a través de la plataforma y verificar el progreso de las metas, pero no tienen permisos para modificar la información de las organizaciones ni manejar los fondos. Esta distinción asegura que las operaciones críticas estén bajo control del owner, mientras que los usuarios participan activamente como donantes.
+![Donate_owner](https://github.com/user-attachments/assets/d30aee4d-9fea-4c93-9ccf-878b3f1b8183)
+"Donate" utiliza un conjunto de tecnologías que trabajan en conjunto para crear una experiencia descentralizada y eficiente. Remix IDE se emplea para escribir y desplegar el contrato inteligente en Solidity, que define las reglas de la plataforma y gestiona las transacciones en la blockchain. Ganache actúa como una red blockchain local, permitiendo simular el entorno de Ethereum para pruebas seguras y rápidas antes de implementar en una red pública. MetaMask es la herramienta que conecta al usuario con la blockchain, permitiendo administrar su cuenta y firmar transacciones de forma segura. Finalmente, la React App proporciona la interfaz de usuario, permitiendo a los donantes y al owner interactuar con el contrato inteligente de manera intuitiva. El flujo de trabajo comienza con la conexión de MetaMask al contrato desplegado en Ganache, desde donde React envía solicitudes de interacción (crear causas, donar, retirar fondos), que son procesadas y almacenadas en la blockchain a través del contrato inteligente.
+![image](https://github.com/user-attachments/assets/becd0307-5dd4-477a-b338-784f8d751a71)
+Cuando una causa alcanza su meta de donaciones, se marca como "meta alcanzada" dentro de la aplicación, indicando que el balance acumulado ha igualado o superado el objetivo establecido. Este cambio es gestionado automáticamente por el contrato inteligente, que verifica constantemente el balance de la causa en relación con su meta. Aunque los usuarios aún pueden visualizar la causa, ya no se permite realizar más donaciones, y el estado reflejado asegura transparencia para todos los participantes. En este punto, el owner de la plataforma puede decidir retirar los fondos acumulados para destinarlos a la causa social correspondiente, garantizando que los recursos sean utilizados según lo planificado.
+![image](https://github.com/user-attachments/assets/1bb1b046-5615-4171-9b5a-2ec10727ad12)
+Al eliminar una causa, esta se remueve permanentemente de la lista de causas disponibles para los usuarios, junto con toda su información asociada, como nombre, descripción, meta de donaciones y balance actual. Esta funcionalidad permite al owner gestionar eficientemente las causas y ajustar la plataforma según las necesidades de la organización.
+![image](https://github.com/user-attachments/assets/20512c71-a0bd-4ffa-9f45-4114dc9a1d91)
+![image](https://github.com/user-attachments/assets/5abd9c5b-90c0-43e1-b6a6-59d720686b1b)
+Cuando el owner decide sacar los fondos, utiliza una función específica del contrato inteligente que transfiere los fondos disponibles del contrato directamente a su cuenta. Este proceso se realiza de manera segura y transparente gracias a la blockchain, registrando cada transacción para evitar inconsistencias o malentendidos. La acción de retirar fondos permite que las donaciones realizadas a las causas puedan ser utilizadas para cumplir los objetivos sociales establecidos por la organización, asegurando que los recursos recaudados sean gestionados de forma eficiente y responsable.
+![image](https://github.com/user-attachments/assets/a940bcb4-f057-4a01-bc78-b5b8d790106b)
+![image](https://github.com/user-attachments/assets/74f11f11-0947-452e-9f34-fea54a1c8bf5)
+
+
+
+
