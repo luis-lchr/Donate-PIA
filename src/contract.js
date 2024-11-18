@@ -1,9 +1,9 @@
 import Web3 from 'web3';
-import ContractABI from './CrowdfundingABI.json';
+import ContractABI from './DonateABI.json';
 
 const getContract = async () => {
     const web3 = new Web3(window.ethereum);
-    const contractAddress = '0x8220b94E6deBeA1d0F8Ef256A06F1bD8C7A99e3A';
+    const contractAddress = '0x89C56BAAA0541ad188EC63c6aEEF210a3f466a3D';
     const contractInstance = new web3.eth.Contract(ContractABI.abi, contractAddress);
     return contractInstance;
 };

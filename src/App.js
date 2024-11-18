@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Web3 from 'web3';
 import getContract from './contract.js';
+import logo from './Donate_Logo.png';
 
 const App = () => {
     const [account, setAccount] = useState('');
@@ -53,6 +54,7 @@ const App = () => {
                 fundGoal: Web3.utils.fromWei(org.fundGoal, 'ether'),
                 balance: Web3.utils.fromWei(org.balance, 'ether'),
                 goalReached: Web3.utils.fromWei(org.balance, 'ether') >= Web3.utils.fromWei(org.fundGoal, 'ether'),
+                donationAmount: '',
             }))
         );
     };
@@ -148,127 +150,188 @@ const App = () => {
     };
 
     return (
-        <div>
-            <h1>Crowdfunding</h1>
-            <p>Tu cuenta: {account}</p>
-            <p>Balance: {balance} ETH</p>
-
-            {isOwner && (
-                <div>
-                    <h2>OWNER</h2>
-                    <button onClick={handleWithdraw}>Sacar fondos de contrato</button>
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Nombre de la organización"
-                            value={newOrg.name}
-                            onChange={(e) => setNewOrg({ ...newOrg, name: e.target.value })}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Descripción de la organización"
-                            value={newOrg.description}
-                            onChange={(e) => setNewOrg({ ...newOrg, description: e.target.value })}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Meta de fondos en ETH"
-                            value={newOrg.fundGoal}
-                            onChange={(e) => setNewOrg({ ...newOrg, fundGoal: e.target.value })}
-                        />
-                        <button onClick={handleAddOrganization}>Agregar organización</button>
-                    </div>
-                </div>
-            )}
-
-            <h2>Organizaciones</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-                {organizations.map((org, index) => (
-                    <div
-                        key={index}
+        <div style={{ fontFamily: "'Poppins', sans-serif",  padding: '0px' }}>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '0px',
+                    backgroundColor: '#f38da3',
+                    margin: '0',
+                    padding: '0',          
+                }}
+            >
+                <img
+                    src={logo}
+                    alt="Donate"
+                    style={{ height: '100px' }}
+                />
+                <div style={{ textAlign: 'right', padding: '20px' }}>
+                    <p
                         style={{
-                            border: '1px solid #ccc',
-                            padding: '10px',
-                            backgroundColor: org.goalReached ? '#d4edda' : '#f8f9fa',
+                            margin: '0',
+                            fontFamily: "'Poppins', sans-serif",
+                            color: 'white',
+                            fontSize: '20px',
                         }}
                     >
-                        {editingOrg && editingOrg.index === index ? (
-                            <div>
-                                <input
-                                    type="text"
-                                    placeholder="Nuevo nombre"
-                                    value={editingOrg.name}
-                                    onChange={(e) => setEditingOrg({ ...editingOrg, name: e.target.value })}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Nueva descripción"
-                                    value={editingOrg.description}
-                                    onChange={(e) =>
-                                        setEditingOrg({ ...editingOrg, description: e.target.value })
-                                    }
-                                />
-                                <input
-                                    type="number"
-                                    placeholder="Nueva meta en ETH"
-                                    value={editingOrg.fundGoal}
-                                    onChange={(e) =>
-                                        setEditingOrg({ ...editingOrg, fundGoal: e.target.value })
-                                    }
-                                />
-                                <button onClick={() => handleEditOrganization(index)}>Guardar</button>
-                                <button onClick={() => setEditingOrg(null)}>Cancelar</button>
-                            </div>
-                        ) : (
-                            <div>
-                                <h3>{org.name}</h3>
-                                <p>Descripción: {org.description}</p>
-                                <p>Meta de fondos: {org.fundGoal} ETH</p>
-                                <p>Balance: {org.balance} ETH</p>
-                                {org.goalReached && <p style={{ color: 'green' }}>¡Meta alcanzada!</p>}
-                                {!org.goalReached && isOwner && (
-                                    <button
-                                        onClick={() =>
-                                            setEditingOrg({
-                                                index,
-                                                name: org.name,
-                                                description: org.description,
-                                                fundGoal: org.fundGoal,
-                                            })
-                                        }
-                                    >
-                                        Editar
-                                    </button>
-                                )}
-                                {isOwner && (
-                                    <button onClick={() => handleDeleteOrganization(index)}>
-                                        Eliminar
-                                    </button>
-                                )}
-                                {!org.goalReached && !isOwner && (
-                                    <>
-                                        <input
-                                            type="number"
-                                            placeholder="Cantidad en ETH"
-                                            onChange={(e) =>
-                                                setOrganizations((prev) =>
-                                                    prev.map((o, i) =>
-                                                        i === index ? { ...o, donationAmount: e.target.value } : o
-                                                    )
-                                                )
-                                            }
-                                        />
-                                        <button onClick={() => handleDonate(index, org.donationAmount || 0)}>
-                                            Donar
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        )}
+                        <strong>Cuenta:</strong> {account}
+                    </p>
+                    <p
+                        style={{
+                            margin: '5px',
+                            fontFamily: "'Poppins', sans-serif",
+                            color: 'white',
+                            fontSize: '20px',
+                        }}
+                    >
+                        <strong>Balance:</strong> {balance} ETH
+                    </p>
+                </div>
+            </div>
+            <div
+                style={{
+                    textAlign: 'center',
+                    backgroundColor: '#fcf0f5',
+                    padding: '5px',
+                    minHeight: '100vh',
+                }}
+            >
+                {isOwner && (
+                    <div>
+                        <h2>Opciones de Owner</h2>
+                        <button onClick={handleWithdraw}>Sacar fondos de contrato</button>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Nombre de la organización"
+                                value={newOrg.name}
+                                onChange={(e) => setNewOrg({ ...newOrg, name: e.target.value })}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Descripción de la organización"
+                                value={newOrg.description}
+                                onChange={(e) => setNewOrg({ ...newOrg, description: e.target.value })}
+                            />
+                            <input
+                                type="number"
+                                placeholder="Meta de fondos en ETH"
+                                value={newOrg.fundGoal}
+                                onChange={(e) => setNewOrg({ ...newOrg, fundGoal: e.target.value })}
+                            />
+                            <button onClick={handleAddOrganization}>Agregar organización</button>
+                        </div>
                     </div>
-                ))}
+                )}
+
+                <h2>Causas</h2>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: '20px',
+                    }}
+                >
+                    {organizations.map((org, index) => (
+                        <div
+                            key={index}
+                            style={{
+                                border: '1px solid #ccc',
+                                padding: '10px',
+                                backgroundColor: org.goalReached ? '#d4edda' : '#f8f9fa',
+                            }}
+                        >
+                            {editingOrg && editingOrg.index === index ? (
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Nuevo nombre"
+                                        value={editingOrg.name}
+                                        onChange={(e) =>
+                                            setEditingOrg({ ...editingOrg, name: e.target.value })
+                                        }
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Nueva descripción"
+                                        value={editingOrg.description}
+                                        onChange={(e) =>
+                                            setEditingOrg({ ...editingOrg, description: e.target.value })
+                                        }
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Nueva meta en ETH"
+                                        value={editingOrg.fundGoal}
+                                        onChange={(e) =>
+                                            setEditingOrg({ ...editingOrg, fundGoal: e.target.value })
+                                        }
+                                    />
+                                    <button onClick={() => handleEditOrganization(index)}>Guardar</button>
+                                    <button onClick={() => setEditingOrg(null)}>Cancelar</button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <h3>{org.name}</h3>
+                                    <p>Descripción: {org.description}</p>
+                                    <p>Meta de fondos: {org.fundGoal} ETH</p>
+                                    <p>Balance: {org.balance} ETH</p>
+                                    {org.goalReached && (
+                                        <p style={{ color: 'green' }}>¡Meta alcanzada!</p>
+                                    )}
+                                    {!org.goalReached && isOwner && (
+                                        <button
+                                            onClick={() =>
+                                                setEditingOrg({
+                                                    index,
+                                                    name: org.name,
+                                                    description: org.description,
+                                                    fundGoal: org.fundGoal,
+                                                })
+                                            }
+                                        >
+                                            Editar
+                                        </button>
+                                    )}
+                                    {isOwner && (
+                                        <button onClick={() => handleDeleteOrganization(index)}>
+                                            Eliminar
+                                        </button>
+                                    )}
+                                    {!org.goalReached && !isOwner && (
+                                        <>
+                                            <input
+                                                type="number"
+                                                placeholder="Cantidad en ETH"
+                                                onChange={(e) =>
+                                                    setOrganizations((prev) =>
+                                                        prev.map((o, i) =>
+                                                            i === index
+                                                                ? { ...o, donationAmount: e.target.value }
+                                                                : o
+                                                        )
+                                                    )
+                                                }
+                                            />
+                                            <button
+                                                onClick={() =>
+                                                    handleDonate(index, org.donationAmount || 0)
+                                                }
+                                            >
+                                                Donar
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
+
     );
 };
 
