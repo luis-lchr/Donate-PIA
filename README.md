@@ -15,6 +15,10 @@ Al eliminar una causa, esta se remueve permanentemente de la lista de causas dis
 Cuando el owner decide sacar los fondos, utiliza una función específica del contrato inteligente que transfiere los fondos disponibles del contrato directamente a su cuenta. Este proceso se realiza de manera segura y transparente gracias a la blockchain, registrando cada transacción para evitar inconsistencias o malentendidos. La acción de retirar fondos permite que las donaciones realizadas a las causas puedan ser utilizadas para cumplir los objetivos sociales establecidos por la organización, asegurando que los recursos recaudados sean gestionados de forma eficiente y responsable.
 ![image](https://github.com/user-attachments/assets/a940bcb4-f057-4a01-bc78-b5b8d790106b)
 ![image](https://github.com/user-attachments/assets/74f11f11-0947-452e-9f34-fea54a1c8bf5)
+Todas las transacciones se ven reflejadas en Ganache a modo de verificación del correcto funcionamiento del software.
+![image](https://github.com/user-attachments/assets/4905d3e2-3bba-4fcc-b40a-68e6a47c5545)
+![image](https://github.com/user-attachments/assets/5833dec9-9a0f-4568-970d-ec85c7f5cf6a)
+
 
 
 
